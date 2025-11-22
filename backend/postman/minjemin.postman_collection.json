@@ -56,7 +56,8 @@
 								{
 									"key": "client_secret",
 									"value": "FPuq7D8HbpjUcuFje4HJENizclNXyIGu",
-									"type": "text"
+									"type": "text",
+									"disabled": true
 								},
 								{
 									"key": "username",
@@ -133,7 +134,8 @@
 								{
 									"key": "client_secret",
 									"value": "FPuq7D8HbpjUcuFje4HJENizclNXyIGu",
-									"type": "text"
+									"type": "text",
+									"disabled": true
 								},
 								{
 									"key": "username",
@@ -241,7 +243,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Kamera\",\r\n    \"description\": \"Cam\",\r\n    \"pricePerDay\": 100000,\r\n    \"stock\": 1\r\n}",
+							"raw": "// {\r\n//     \"name\": \"Kamera\",\r\n//     \"description\": \"Cam\",\r\n//     \"pricePerDay\": 100000,\r\n//     \"stock\": 1\r\n// }\r\n\r\n{\r\n    \"name\": \"Piano\",\r\n    \"description\": \"Music\",\r\n    \"pricePerDay\": 15000000,\r\n    \"stock\": 10\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -262,9 +264,6 @@
 				},
 				{
 					"name": "my-item",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -278,15 +277,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\" : \"Kamera Sony A7 III\",\r\n    \"description\" : \"Mirrorless premium\",\r\n    \"pricePerDay\" : 150000\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{baseUrlBackend}}/items/my",
 							"host": [

@@ -10,10 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/plots": "^2.3.3",
+    "antd": "^5.24.0",
+    "axios": "^1.7.9",
     "@react-keycloak/web": "^3.4.0",
     "keycloak-js": "^26.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.1.4"
   },
   "devDependencies": {
