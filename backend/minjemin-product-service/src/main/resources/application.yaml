@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: minjemin-product-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:14082/realms/minjemin
+  datasource:
+    url: jdbc:postgresql://localhost:5432/minjemindb
+    username: minjemin
+    password: minjemin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    out-of-order: true
+server:
+  port: 8080
+
+

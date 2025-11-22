@@ -1,0 +1,569 @@
+{
+	"info": {
+		"_postman_id": "070547fa-b703-4b62-b847-ca94159e4d22",
+		"name": "minjemin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17177589"
+	},
+	"item": [
+		{
+			"name": "keycloak-auth",
+			"item": [
+				{
+					"name": "keycloak-login-admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse JSON response\r",
+									"let res = pm.response.json();\r",
+									"\r",
+									"// Save values to environment\r",
+									"pm.environment.set(\"accessToken\", res.access_token);\r",
+									"pm.environment.set(\"refreshToken\", res.refresh_token);\r",
+									"\r",
+									"// Jika ada expiredAt (misal \"900\")\r",
+									"if (res.expiredAt) {\r",
+									"    pm.environment.set(\"expiredAt\", res.expires_in);\r",
+									"}\r",
+									"\r",
+									"console.log(\"Tokens saved to sewaapp-env\");\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "minjemin-fe",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "FPuq7D8HbpjUcuFje4HJENizclNXyIGu",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrlKeycloak}}/realms/minjemin/protocol/openid-connect/token",
+							"host": [
+								"{{baseUrlKeycloak}}"
+							],
+							"path": [
+								"realms",
+								"minjemin",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "keycloak-login-user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse JSON response\r",
+									"let res = pm.response.json();\r",
+									"\r",
+									"// Save values to environment\r",
+									"pm.environment.set(\"accessToken\", res.access_token);\r",
+									"pm.environment.set(\"refreshToken\", res.refresh_token);\r",
+									"\r",
+									"// Jika ada expiredAt (misal \"900\")\r",
+									"if (res.expiredAt) {\r",
+									"    pm.environment.set(\"expiredAt\", res.expires_in);\r",
+									"}\r",
+									"\r",
+									"console.log(\"Tokens saved to sewaapp-env\");\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "minjemin-fe",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "FPuq7D8HbpjUcuFje4HJENizclNXyIGu",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "user",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "user",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrlKeycloak}}/realms/minjemin/protocol/openid-connect/token",
+							"host": [
+								"{{baseUrlKeycloak}}"
+							],
+							"path": [
+								"realms",
+								"minjemin",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-user-id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlBackend}}/users/me",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-user-info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlBackend}}/users/user-info",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"users",
+								"user-info"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "item",
+			"item": [
+				{
+					"name": "create-item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Kamera\",\r\n    \"description\": \"Cam\",\r\n    \"pricePerDay\": 100000,\r\n    \"stock\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlBackend}}/items",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "my-item",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"Kamera Sony A7 III\",\r\n    \"description\" : \"Mirrorless premium\",\r\n    \"pricePerDay\" : 150000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlBackend}}/items/my",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"items",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-item-by-id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlBackend}}/items/2",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"items",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "rental",
+			"item": [
+				{
+					"name": "create-rental",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"itemId\" : 2,\r\n    \"startDate\" : \"2025-12-01\",\r\n    \"endDate\": \"2025-12-03\",\r\n    \"totalPrice\": 300000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlBackend}}/rentals",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"rentals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "my-rental",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"Kamera Sony A7 III\",\r\n    \"description\" : \"Mirrorless premium\",\r\n    \"pricePerDay\" : 150000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlBackend}}/rentals/my",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"rentals",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "approve-rental",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlBackend}}/rentals/1/approve",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"rentals",
+								"1",
+								"approve"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "start-rental",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlBackend}}/rentals/1/start",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"rentals",
+								"1",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "complete-rental",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlBackend}}/rentals/1/complete",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"rentals",
+								"1",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payment",
+			"item": [
+				{
+					"name": "pay-rental",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlBackend}}/payments/rental/1?amount=300000",
+							"host": [
+								"{{baseUrlBackend}}"
+							],
+							"path": [
+								"payments",
+								"rental",
+								"1"
+							],
+							"query": [
+								{
+									"key": "amount",
+									"value": "300000"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cars",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlBackend}}/cars",
+					"host": [
+						"{{baseUrlBackend}}"
+					],
+					"path": [
+						"cars"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
