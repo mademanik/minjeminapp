@@ -3,6 +3,7 @@ package com.minjemin.product.controller;
 import com.minjemin.product.dto.RentalDTO;
 import com.minjemin.product.service.RentalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +20,24 @@ public class RentalController {
     @PostMapping
     public RentalDTO create(@RequestBody RentalDTO dto, @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getClaim("sub");
-        return rentalService.createRental(dto, userId);
+        String username = jwt.getClaim("preferred_username");
+        return rentalService.createRental(dto, userId, username);
     }
 
     @GetMapping("/my")
-    public List<RentalDTO> getMy(@AuthenticationPrincipal Jwt jwt) {
+    public List<RentalDTO> getMy(@AuthenticationPrincipal Jwt jwt,
+                                 @RequestParam(required = false) String name,
+                                 @RequestParam(required = false) String status) {
         String userId = jwt.getClaim("sub");
-        return rentalService.getMyRentals(userId);
+        return rentalService.getMyRentals(userId, name, status);
+    }
+
+    @GetMapping("/request")
+    public List<RentalDTO> getRequestRentals(@AuthenticationPrincipal Jwt jwt,
+                                 @RequestParam(required = false) String name,
+                                 @RequestParam(required = false) String status) {
+        String ownerId = jwt.getClaim("sub");
+        return rentalService.getRequestRentals(ownerId, name, status);
     }
 
     @PostMapping("/{id}/approve")
@@ -55,5 +67,11 @@ public class RentalController {
     @GetMapping("/{id}")
     public RentalDTO getById(@PathVariable Long id) {
         return rentalService.getById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRentalById(@PathVariable Long id) {
+        rentalService.deleteRentalById(id);
+        return ResponseEntity.noContent().build();
     }
 }

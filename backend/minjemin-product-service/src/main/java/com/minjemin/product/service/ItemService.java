@@ -8,6 +8,7 @@ public interface ItemService {
     ItemDTO createItem(ItemDTO dto, String userId);
     List<ItemDTO> getMyItems(String userId, String name, Double minPrice, Double maxPrice);
     ItemDTO getItemById(Long id);
+    List<ItemDTO> getAllItems();
     ItemDTO updateItemById(Long id, ItemDTO dto);
     void deleteItemById(Long id);
 }

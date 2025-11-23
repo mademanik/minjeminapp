@@ -9,7 +9,7 @@ import {
     message,
     Modal,
     Row,
-    Select,
+    Select, Switch,
     Table,
     Typography
 } from "antd";
@@ -23,6 +23,8 @@ const {Title} = Typography;
 interface Rental {
     id: number;
     itemId: number;
+    borrowerId: string;
+    borrowerName: string;
     startDate: string;
     endDate: string;
     totalPrice: number;
@@ -40,7 +42,7 @@ interface Product {
     stock: number;
 }
 
-const Rentals = () => {
+const RequestRentals = () => {
     const [data, setData] = useState<Rental[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingRental, setEditingRental] = useState<Rental | null>(null);
@@ -70,22 +72,6 @@ const Rentals = () => {
         return end.diff(start, "day") + 1;
     };
 
-    const handleDateChange = () => {
-        const start = form.getFieldValue("startDate");
-        const end = form.getFieldValue("endDate");
-        const selectedItemId = form.getFieldValue("itemId");
-
-        if (start && end && selectedItemId) {
-            const item = products.find(p => p.id === selectedItemId);
-            if (!item) return;
-
-            const days = calculateDays(start, end);
-            const total = item.pricePerDay * days;
-
-            form.setFieldsValue({ totalPrice: total });
-        }
-    };
-
     const fetchProducts = async () => {
         try {
             const response = await axios.get("http://localhost:8080/items", {headers});
@@ -105,7 +91,7 @@ const Rentals = () => {
             }
 
             const response = await axios.get<Rental[]>(
-                "http://localhost:8080/rentals/my",
+                "http://localhost:8080/rentals/request",
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -113,8 +99,6 @@ const Rentals = () => {
                     params: filters
                 }
             );
-
-            console.log(response)
 
             const sortedData = (response.data ?? []).sort((a, b) => a.id - b.id);
             setData(sortedData);
@@ -127,10 +111,40 @@ const Rentals = () => {
         }
     };
 
+    const fetchRentalById = async (id: any) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/rentals/${id}`, {headers});
+            console.log(response)
+            return response.data;
+        } catch (error) {
+            message.error(`Failed to fetch rental details : ${error}`);
+            return null;
+        }
+    };
+
     const showModal = async (rental: Rental | null = null) => {
         setEditingRental(rental);
         setIsModalVisible(true);
         form.resetFields();
+        if (rental) {
+            const rentalData = await fetchRentalById(rental.id);
+            if (rentalData) {
+                form.setFieldsValue({
+                    itemId: rentalData.itemId,
+                    itemName: rentalData.itemName,
+                    borrowerId: rentalData.borrowerId,
+                    borrowerName: rentalData.borrowerName,
+                    startDate: rentalData.startDate,
+                    endDate: rentalData.endDate,
+                    totalPrice: rentalData.totalPrice,
+                    status: rentalData.status,
+                    approvedBy: rentalData.approvedBy,
+                    paid: rentalData.paid,
+                });
+            }
+        } else {
+            form.resetFields();
+        }
     };
 
     const handleDelete = async (id: any) => {
@@ -173,12 +187,13 @@ const Rentals = () => {
     };
 
     const handleReset = () => {
-        setFilters({ name: '', status: '' });
+        setFilters({name: '', status: ''});
         fetchRentals();
     };
 
     const columns: ColumnsType<Rental> = [
         {title: 'ID Rental', dataIndex: 'id', key: 'id'},
+        {title: 'Borrower Name', dataIndex: 'borrowerName', key: 'borrowerName'},
         {title: 'Product', dataIndex: 'itemName', key: 'itemName'},
         {title: 'Start Date', dataIndex: 'startDate', key: 'startDate'},
         {title: 'End Date', dataIndex: 'endDate', key: 'endDate'},
@@ -207,6 +222,7 @@ const Rentals = () => {
             key: 'actions',
             render: (_, record) => (
                 <>
+                    <Button onClick={() => showModal(record)} style={{marginRight: 8}}>Update</Button>
                     <Button onClick={() => handleDelete(record.id)} danger>Delete</Button>
                 </>
             ),
@@ -215,12 +231,6 @@ const Rentals = () => {
 
     return (
         <div>
-            {/* Header with Title and Add Product Button */}
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
-                <Title level={3}>Rentals</Title>
-                <Button type="primary" onClick={() => showModal()}>Add Rental</Button>
-            </div>
-
             {/* Search Filters */}
             <Row gutter={16} style={{marginBottom: 16, display: 'flex', alignItems: 'center'}}>
                 <Col span={6}>
@@ -254,53 +264,54 @@ const Rentals = () => {
 
             {/* Modal for Add/Edit Product */}
             <Modal
-                title={editingRental ? 'Edit Rental' : 'Add Rental'}
+                title={editingRental ? 'Update Rental' : 'Add Rental'}
                 visible={isModalVisible}
                 onOk={handleSubmit}
                 onCancel={handleCancel}
+                bodyStyle={{
+                    maxHeight: '60vh',
+                    overflowY: 'auto'
+                }}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="itemId" label="Product"
-                               rules={[{required: true, message: "Please select a product"}]}>
-                        <Select showSearch
-                                placeholder="Select Product"
-                                optionFilterProp="label"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                            options={products.map(item => ({
-                                label: item.name,
-                                value: item.id
-                            }))}
-                            onChange={handleDateChange}
-                        />
+                    <Form.Item
+                        name="itemName"
+                        label="Product Name">
+                        <Input readOnly/>
+                    </Form.Item>
+                    <Form.Item
+                        name="borrowerName"
+                        label="Borrower Name">
+                        <Input readOnly/>
                     </Form.Item>
                     <Form.Item
                         name="startDate"
                         label="Start Date"
-                        rules={[{ required: true, message: 'Please enter Start Date' }]}>
-                        <DatePicker
-                            format="YYYY-MM-DD"
-                            style={{ width: "100%" }}
-                            onChange={handleDateChange}
-                        />
+                        rules={[{required: true, message: 'Please enter Start Date'}]}>
+                        <Input readOnly/>
                     </Form.Item>
-
                     <Form.Item
                         name="endDate"
                         label="End Date"
-                        rules={[{ required: true, message: 'Please enter End Date' }]}>
-                        <DatePicker
-                            format="YYYY-MM-DD"
-                            style={{ width: "100%" }}
-                            onChange={handleDateChange}
-                        />
+                        rules={[{required: true, message: 'Please enter End Date'}]} readOnly>
+                        <Input/>
                     </Form.Item>
-
+                    <Form.Item
+                        name="status"
+                        label="Status">
+                        <Input readOnly/>
+                    </Form.Item>
+                    <Form.Item
+                        name="paid"
+                        label="Paid"
+                        valuePropName="checked"
+                    >
+                        <Switch/>
+                    </Form.Item>
                     <Form.Item
                         name="totalPrice"
                         label="Total Price">
-                        <Input type="number" readOnly />
+                        <Input type="number" readOnly/>
                     </Form.Item>
                 </Form>
             </Modal>
@@ -308,4 +319,4 @@ const Rentals = () => {
     );
 };
 
-export default Rentals;
+export default RequestRentals;

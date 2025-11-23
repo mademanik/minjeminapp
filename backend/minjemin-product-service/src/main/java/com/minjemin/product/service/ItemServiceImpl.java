@@ -50,6 +50,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public List<ItemDTO> getAllItems() {
+        List<Item> items = itemRepository.findAll();
+        return items.stream().map(itemMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
     public ItemDTO updateItemById(Long id, ItemDTO dto) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException("item not found"));
         item.setName(dto.getName());

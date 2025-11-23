@@ -9,6 +9,8 @@ import Products from "./pages/Products";
 import Rentals from "./pages/Rentals";
 import Home from "./pages/Home.tsx";
 import {Spin} from "antd";
+import AdminRoute from "./components/AdminRoute.tsx";
+import RequestRentals from "./pages/RequestRentals.tsx";
 
 function App() {
     return (
@@ -21,12 +23,12 @@ function App() {
 }
 
 const SecuredContent: React.FC = () => {
-    const { keycloak, initialized } = useKeycloak();
+    const {keycloak, initialized} = useKeycloak();
 
     if (!initialized) {
         return (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "20%" }}>
-                <Spin size="large" tip="Initializing authentication..." />
+            <div style={{display: "flex", justifyContent: "center", marginTop: "20%"}}>
+                <Spin size="large" tip="Initializing authentication..."/>
             </div>
         );
     }
@@ -36,26 +38,47 @@ const SecuredContent: React.FC = () => {
     if (!isLoggedIn) {
         keycloak.login();
         return (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "20%" }}>
-                <Spin size="large" tip="Redirecting to login..." />
+            <div style={{display: "flex", justifyContent: "center", marginTop: "20%"}}>
+                <Spin size="large" tip="Redirecting to login..."/>
             </div>
         );
     }
 
+    const isAdmin = keycloak?.hasRealmRole("admin-role");
+
     return (
         <Routes>
-            {/* redirect root ke dashboard */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Redirect root based on role */}
+            <Route
+                path="/"
+                element={
+                    <Navigate
+                        to={isAdmin ? "/dashboard" : "/dashboard/products"}
+                        replace
+                    />
+                }
+            />
 
-            {/* protected routes */}
-            <Route path="/dashboard/*" element={<Dashboard />}>
-                <Route index element={<Home />} />
-                <Route path="products" element={<Products />} />
-                <Route path="rentals" element={<Rentals />} />
+            {/* Protected Dashboard */}
+            <Route path="/dashboard/*" element={<Dashboard/>}>
+                {/* Home only for admin */}
+                <Route
+                    index
+                    element={
+                        <AdminRoute>
+                            <Home/>
+                        </AdminRoute>
+                    }
+                />
+
+                {/* Products & Rentals for all role */}
+                <Route path="products" element={<Products/>}/>
+                <Route path="rentals" element={<Rentals/>}/>
+                <Route path="request-rentals" element={<RequestRentals/>}/>
             </Route>
 
-            {/* fallback */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace/>}/>
         </Routes>
     );
 };

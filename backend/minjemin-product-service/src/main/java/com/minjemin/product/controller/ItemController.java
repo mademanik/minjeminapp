@@ -32,6 +32,11 @@ public class ItemController {
         return itemService.getMyItems(userId, name, minPrice, maxPrice);
     }
 
+    @GetMapping("")
+    public List<ItemDTO> getAllItems() {
+        return itemService.getAllItems();
+    }
+
     @GetMapping("/{id}")
     public ItemDTO getById(@PathVariable Long id) {
         return itemService.getItemById(id);

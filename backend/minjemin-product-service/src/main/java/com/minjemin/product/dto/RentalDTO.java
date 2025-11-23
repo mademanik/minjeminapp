@@ -8,7 +8,9 @@ import java.time.LocalDate;
 public class RentalDTO {
     private Long id;
     private Long itemId;
+    private String itemName;
     private String borrowerId;
+    private String borrowerName;
     private LocalDate startDate;
     private LocalDate endDate;
     private Double totalPrice;

@@ -28,6 +28,7 @@ public class Rental {
 
     @Column(nullable = false)
     private String borrowerId;
+    private String borrowerName;
 
     private LocalDate startDate;
     private LocalDate endDate;

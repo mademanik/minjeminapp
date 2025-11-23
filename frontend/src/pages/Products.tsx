@@ -242,7 +242,7 @@ const Products = () => {
                     <Form.Item
                         name="pricePerDay"
                         label="Price Per Day"
-                        rules={[{required: true, message: 'Price Per Day'}]}
+                        rules={[{required: true, message: 'Please enter Price Per Day'}]}
                     >
                         <Input type="number"/>
                     </Form.Item>
@@ -256,7 +256,7 @@ const Products = () => {
                     <Form.Item
                         name="stock"
                         label="Stock"
-                        rules={[{required: true, message: 'Stock'}]}
+                        rules={[{required: true, message: 'Please enter Stock'}]}
                     >
                         <Input type="number"/>
                     </Form.Item>

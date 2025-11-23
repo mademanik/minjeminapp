@@ -26,7 +26,7 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     @Transactional
-    public RentalDTO createRental(RentalDTO dto, String borrowerId) {
+    public RentalDTO createRental(RentalDTO dto, String borrowerId, String borrowerName) {
         // validasi basic
         if (dto.getStartDate() == null || dto.getEndDate() == null) {
             throw new BadRequestException("startDate and endDate required");
@@ -57,6 +57,7 @@ public class RentalServiceImpl implements RentalService {
         Rental rental = Rental.builder()
                 .item(item)
                 .borrowerId(borrowerId)
+                .borrowerName(borrowerName)
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
                 .totalPrice(dto.getTotalPrice())
@@ -69,9 +70,33 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public List<RentalDTO> getMyRentals(String borrowerId) {
+    public List<RentalDTO> getMyRentals(String borrowerId, String name, String status) {
+        String normalizedName = (name == null || name.isBlank()) ? null : name.toLowerCase();
+        String normalizedStatus = (status == null || status.isBlank()) ? null : status.toLowerCase();
+
         return rentalRepository.findByBorrowerId(borrowerId)
-                .stream().map(rentalMapper::toDto).collect(Collectors.toList());
+                .stream()
+                .filter(rental -> normalizedName == null
+                        || rental.getItem().getName().toLowerCase().contains(normalizedName))
+                .filter(rental -> normalizedStatus == null
+                        || rental.getStatus().toString().toLowerCase().contains(normalizedStatus))
+                .map(rentalMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RentalDTO> getRequestRentals(String ownerId, String name, String status) {
+        String normalizedName = (name == null || name.isBlank()) ? null : name.toLowerCase();
+        String normalizedStatus = (status == null || status.isBlank()) ? null : status.toLowerCase();
+
+        return rentalRepository.findByItem_OwnerId(ownerId)
+                .stream()
+                .filter(rental -> normalizedName == null
+                        || rental.getItem().getName().toLowerCase().contains(normalizedName))
+                .filter(rental -> normalizedStatus == null
+                        || rental.getStatus().toString().toLowerCase().contains(normalizedStatus))
+                .map(rentalMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -170,5 +195,13 @@ public class RentalServiceImpl implements RentalService {
     public RentalDTO getById(Long id) {
         return rentalMapper.toDto(rentalRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Rental not found")));
+    }
+
+    @Override
+    public void deleteRentalById(Long id) {
+        Rental rental = rentalRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Rental not found"));
+
+        rentalRepository.delete(rental);
     }
 }
