@@ -1,9 +1,14 @@
 package com.minjemin.product.service;
 
 import com.minjemin.product.dto.ItemDTO;
+import com.minjemin.product.exception.BadRequestException;
 import com.minjemin.product.exception.NotFoundException;
+import com.minjemin.product.mapper.ItemMapper;
 import com.minjemin.product.model.Item;
+import com.minjemin.product.model.Rental;
+import com.minjemin.product.model.RentalStatus;
 import com.minjemin.product.repository.ItemRepository;
+import com.minjemin.product.repository.RentalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,55 +20,61 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
+    private final RentalRepository rentalRepository;
 
     @Override
     public ItemDTO createItem(ItemDTO dto, String userId) {
-        Item item = Item.builder()
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .pricePerDay(dto.getPricePerDay())
-                .available(true)
-                .ownerId(userId)
-                .stock(dto.getStock())
-                .build();
-
+        Item item = itemMapper.toEntity(dto);
+        item.setOwnerId(userId);
+        item.setAvailable(true);
         Item saved = itemRepository.save(item);
-        dto.setId(saved.getId());
-        dto.setOwnerId(userId);
-        dto.setAvailable(true);
-        return dto;
+        return itemMapper.toDto(saved);
     }
 
     @Override
-    public List<ItemDTO> getMyItems(String userId) {
+    public List<ItemDTO> getMyItems(String userId, String name, Double minPrice, Double maxPrice) {
         return itemRepository.findByOwnerId(userId)
                 .stream()
-                .map(item -> {
-                    ItemDTO dto = new ItemDTO();
-                    dto.setId(item.getId());
-                    dto.setName(item.getName());
-                    dto.setDescription(item.getDescription());
-                    dto.setPricePerDay(item.getPricePerDay());
-                    dto.setOwnerId(item.getOwnerId());
-                    dto.setAvailable(item.getAvailable());
-                    dto.setStock(item.getStock());
-                    return dto;
-                }).collect(Collectors.toList());
+                .filter(item -> name == null || item.getName().toLowerCase().contains(name.toLowerCase()))
+                .filter(item -> minPrice == null || item.getPricePerDay() >= minPrice)
+                .filter(item -> maxPrice == null || item.getPricePerDay() <= maxPrice)
+                .map(itemMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public ItemDTO getItemById(Long id) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException("item not found"));
+        return itemMapper.toDto(item);
+    }
 
-        ItemDTO dto = new ItemDTO();
-        dto.setId(item.getId());
-        dto.setName(item.getName());
-        dto.setDescription(item.getDescription());
-        dto.setPricePerDay(item.getPricePerDay());
-        dto.setOwnerId(item.getOwnerId());
-        dto.setAvailable(item.getAvailable());
-        dto.setStock(item.getStock());
+    @Override
+    public ItemDTO updateItemById(Long id, ItemDTO dto) {
+        Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException("item not found"));
+        item.setName(dto.getName());
+        item.setDescription(dto.getDescription());
+        item.setPricePerDay(dto.getPricePerDay());
+        item.setAvailable(dto.isAvailable());
+        item.setStock(dto.getStock());
 
-        return dto;
+        Item saved = itemRepository.save(item);
+        return itemMapper.toDto(saved);
+    }
+
+    @Override
+    public void deleteItemById(Long id) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Item not found"));
+
+        List<Rental> rentals = rentalRepository.findByItem_IdAndStatusNotIn(id,
+                List.of(RentalStatus.COMPLETED, RentalStatus.CANCELLED));
+
+        if (!rentals.isEmpty()) {
+            throw new BadRequestException("Item still used in Rentals");
+        }
+
+        itemRepository.delete(item);
+        rentalRepository.deleteByItem_Id(id);
     }
 }
