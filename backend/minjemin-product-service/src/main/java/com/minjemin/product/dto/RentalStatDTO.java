@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class RentalStatDTO {
     private Integer totalRental;
     private List<RentalDTO> dataRentals;

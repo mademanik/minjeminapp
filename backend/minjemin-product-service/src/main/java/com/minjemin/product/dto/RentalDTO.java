@@ -1,10 +1,12 @@
 package com.minjemin.product.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
+@Builder(toBuilder = true)
 public class RentalDTO {
     private Long id;
     private Long itemId;

@@ -3,6 +3,8 @@ package com.minjemin.product.controller;
 import com.minjemin.product.dto.RentalDTO;
 import com.minjemin.product.service.RentalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,6 +32,22 @@ public class RentalController {
                                  @RequestParam(required = false) String status) {
         String userId = jwt.getClaim("sub");
         return rentalService.getMyRentals(userId, name, status);
+    }
+
+    @GetMapping("/my/page")
+    public Page<RentalDTO> getMyPage(@AuthenticationPrincipal Jwt jwt,
+                                     @RequestParam(required = false) String name,
+                                     @RequestParam(required = false) String status, Pageable pageable) {
+        String userId = jwt.getClaim("sub");
+        return rentalService.getMyRentalsPage(userId, name, status, pageable);
+    }
+
+    @GetMapping("/my/pagedb")
+    public Page<RentalDTO> getMyPageDb(@AuthenticationPrincipal Jwt jwt,
+                                     @RequestParam(required = false) String name,
+                                     @RequestParam(required = false) String status, Pageable pageable) {
+        String userId = jwt.getClaim("sub");
+        return rentalService.getMyRentalsPageDb(userId, name, status, pageable);
     }
 
     @GetMapping("/request")

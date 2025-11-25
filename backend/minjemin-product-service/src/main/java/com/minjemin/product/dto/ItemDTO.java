@@ -1,8 +1,10 @@
 package com.minjemin.product.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder(toBuilder = true)
 public class ItemDTO {
     private Long id;
     private String name;

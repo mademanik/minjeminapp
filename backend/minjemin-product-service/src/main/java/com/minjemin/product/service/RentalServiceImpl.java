@@ -11,8 +11,13 @@ import com.minjemin.product.repository.ItemRepository;
 import com.minjemin.product.repository.RentalRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,6 +87,44 @@ public class RentalServiceImpl implements RentalService {
                         || rental.getStatus().toString().toLowerCase().contains(normalizedStatus))
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<RentalDTO> getMyRentalsPage(String borrowerId, String name, String status, Pageable pageable) {
+        String normalizedName = (name == null || name.isBlank()) ? null : name.toLowerCase();
+        String normalizedStatus = (status == null || status.isBlank()) ? null : status.toLowerCase();
+
+        List<Rental> allRentals = rentalRepository.findByBorrowerId(borrowerId);
+
+        List<RentalDTO> filteredDtos = allRentals.stream()
+                .filter(rental -> normalizedName == null
+                        || rental.getItem().getName().toLowerCase().contains(normalizedName))
+                .filter(rental -> normalizedStatus == null
+                        || rental.getStatus().toString().toLowerCase().contains(normalizedStatus))
+                .map(rentalMapper::toDto)
+                .collect(Collectors.toList());
+
+        int pageSize = pageable.getPageSize();
+        int currentPage = pageable.getPageNumber();
+        int startItem = currentPage * pageSize;
+
+        List<RentalDTO> pageList;
+
+        if (filteredDtos.size() < startItem) {
+            pageList = Collections.emptyList();
+        } else {
+            int toIndex = Math.min(startItem + pageSize, filteredDtos.size());
+            pageList = filteredDtos.subList(startItem, toIndex);
+        }
+
+        return new PageImpl<>(pageList, pageable, filteredDtos.size());
+    }
+
+    @Override
+    public Page<RentalDTO> getMyRentalsPageDb(String borrowerId, String name, String status, Pageable pageable) {
+        Specification<Rental> spec = RentalSpecification.filterRentals(borrowerId, name, status);
+        Page<Rental> rentalPage = rentalRepository.findAll(spec, pageable);
+        return rentalPage.map(rentalMapper::toDto);
     }
 
     @Override
